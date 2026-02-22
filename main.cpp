@@ -5,6 +5,7 @@
 
 #include "Validation.h"
 #include "Random.h"
+#include "Greedy.h"
 
 
 int main(int argc, char* argv[]){
@@ -29,13 +30,26 @@ int main(int argc, char* argv[]){
         return err;
     }
 
-    Solution sol = random_solution(jobs, total_machines);
-    printf("random_solution out \n");
+    // Solution sol = random_solution(jobs, total_machines);
+    // printf("random_solution out \n");
 
-    err = evaluate_solution(sol);
-    if (err != 0) {
-        printf("evaluate_solution: infeasible\n");
-    }
+    // err = evaluate_solution(sol);
+    // if (err != 0) {
+    //     printf("evaluate_solution: infeasible\n");
+    // }
+
+    // err = validate_solution(sol);
+    // if (err != 0) {
+    //     printf("validate_solution: %d errors\n", err);
+    // } else {
+    //     printf("solution OK\n");
+    // }
+
+    // write_solution("random_solution.txt", sol);
+
+    Solution sol = greedy_solution(jobs, 0, total_machines);
+    printf("greedy_solution out \n");
+
 
     err = validate_solution(sol);
     if (err != 0) {
@@ -44,7 +58,7 @@ int main(int argc, char* argv[]){
         printf("solution OK\n");
     }
 
-    write_solution("random_solution.txt", sol);
+    write_solution("greedy_solution.txt", sol);
 
 
     // int i =0;

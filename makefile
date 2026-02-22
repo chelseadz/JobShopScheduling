@@ -1,8 +1,8 @@
 CXX      := g++
 CXXFLAGS := -std=c++17 -O2 -Wall -Wextra -pedantic
 
-TARGET   := main
-SRCS     := main.cpp Utils.cpp Random.cpp Validation.cpp
+TARGET   := main.exe
+SRCS     := main.cpp Utils.cpp Random.cpp Validation.cpp Greedy.cpp
 
 .PHONY: all clean
 

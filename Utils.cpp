@@ -128,7 +128,7 @@ int read_instance(std::string filename, instance& jobs, int *total_jobs, int* to
 
         jobs.push_back(aux); // se guarda el job i
 
-        printf("inserted job %d: \n", i);
+        // printf("inserted job %d: \n", i);
 
         // for(auto operation : jobs.at(i)){
             
