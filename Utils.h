@@ -3,6 +3,7 @@
 
 #include <queue>
 #include <vector>
+#include <string>
 
 typedef struct OperationSol{
     int machine;

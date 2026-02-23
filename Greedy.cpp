@@ -1,5 +1,6 @@
 #include "Greedy.h"
-
+#include <cstdio>
+#include <limits>
 
 int add_operation(Solution& sol, instance& jobs, int job_ix){
     if (job_ix < 0 || job_ix >= (int)jobs.size()) return -1;
