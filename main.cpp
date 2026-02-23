@@ -1,7 +1,6 @@
 #include <stdio.h>
-#include <vector>
 #include <iostream>
-#include <queue>
+#include <filesystem>
 
 #include "Validation.h"
 #include "Random.h"
@@ -46,34 +45,50 @@ int main(int argc, char* argv[]){
     // }
 
     // write_solution("random_solution.txt", sol);
+    for(int i = 0; i < (int) jobs.size(); i++){
+        Solution sol = greedy_solution(jobs, i, total_machines);
+        printf("greedy_solution out \n");
 
-    Solution sol = greedy_solution(jobs, 0, total_machines);
-    printf("greedy_solution out \n");
+        err = validate_solution(sol);
+        if (err != 0) {
+            printf("validate_solution: %d errors\n", err);
+        } else {
+            printf("solution OK\n");
+        }
+        std::filesystem::path outDir = "solutions";  
+        std::filesystem::create_directories(outDir); 
 
+        std::filesystem::path outFile = outDir / ("greedy_" + std::to_string(i) + ".sol");
 
-    err = validate_solution(sol);
-    if (err != 0) {
-        printf("validate_solution: %d errors\n", err);
-    } else {
-        printf("solution OK\n");
+        write_solution(outFile.string(), sol);
     }
 
-    write_solution("greedy_solution.txt", sol);
 
+    for(int i = 0; i < 100; i++){
+        Solution sol = random_solution(jobs, total_machines);
+        printf("random_solution out \n");
 
-    // int i =0;
-    // for (auto job : jobs){
-    //     printf("job %d: ", i);
-    //     for(std::pair<int, int> operation : job){
-    //         printf("(%d, %d), ", operation.first, operation.second);
-    //     }        
+        err = evaluate_solution(sol);
+        if (err != 0) {
+            printf("evaluate_solution: infeasible\n");
+        }
 
-    //     printf("\b\b");
-    //     printf("\n");
-    //     i++;
-    // }
+        err = validate_solution(sol);
+        if (err != 0) {
+            printf("validate_solution: %d errors\n", err);
+        } else {
+            printf("solution OK\n");
+        }
 
-    // delete sol;
+        std::filesystem::path outDir = "solutions";  
+        std::filesystem::create_directories(outDir); 
+
+        std::filesystem::path outFile = outDir / ("random_" + std::to_string(i) + ".sol");
+
+        write_solution(outFile.string(), sol);
+    }
+
+    // delete jobs;
     free_instance(jobs);
 
     return 0;

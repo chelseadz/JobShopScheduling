@@ -4,7 +4,7 @@
 
 #include "Random.h"
 
-Solution random_solution(instance& jobs, int total_machines){
+Solution random_solution(instance jobs, int total_machines){
     printf("Generating random_solution...  \n");
     Solution sol(total_machines);
 
@@ -33,7 +33,7 @@ Solution random_solution(instance& jobs, int total_machines){
         actual_op = jobs.at(actual_job).front();
         jobs.at(actual_job).pop_front();
 
-        // printf("pop front: (%d, %d)\n", actual_op.first, actual_op.second);
+        // printf("pop front: (%d, %d)\n", actual_op->job, actual_op->op_idx);
         
         current_machine = actual_op->machine;
 

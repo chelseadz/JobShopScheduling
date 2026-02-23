@@ -36,5 +36,6 @@ int write_solution(const std::string& out_filename, const Solution& sol);
 
 int read_instance(std::string filename, instance& jobs, int *total_jobs, int* total_machines);
 
+int calculate_max_time(const Solution& sol);
 
 #endif 

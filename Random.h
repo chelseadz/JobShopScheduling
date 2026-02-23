@@ -4,6 +4,6 @@
 
 #include "Utils.h"  
 
-Solution random_solution(instance& jobs, int total_machines);
+Solution random_solution(instance jobs, int total_machines);
 
 #endif 

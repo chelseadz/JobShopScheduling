@@ -20,17 +20,10 @@ int add_operation(Solution& sol, instance& jobs, int job_ix){
 
     OperationSol* required_op = actual_op->requiredOp; // may be nullptr
 
+    int machine_ready = previous_op ? previous_op->end_time : 0;
+    int job_ready     = required_op ? required_op->end_time : 0;
 
-    if(previous_op == nullptr)
-        actual_op->start_time = 0;
-    else{
-        // la operacion anterior ya fue procesada
-        actual_op->start_time = 
-            previous_op->end_time > required_op->end_time ? 
-            previous_op->end_time : // el tiempo de inicio es de la operacion anterior es mayor
-            required_op->end_time;  // el tiempo de inicio es de la operacion requerida es mayor
-    }
-
+    actual_op->start_time = (machine_ready > job_ready) ? machine_ready : job_ready;
     actual_op->end_time = actual_op->start_time + actual_op->processing_time;
 
     // agregamos la operacion actual en la maquina que corresponda
@@ -54,8 +47,10 @@ Solution greedy_solution(instance jobs, int start_job, int total_machines){
     for(int i = 0; i < (int) jobs.size(); i++){
 
         // printf("i: %d ", i);
-        ready_op.push_back(jobs.at(i).front()); 
-        jobs.at(i).pop_front();
+        if (!jobs[i].empty()) {
+            ready_op.push_back(jobs.at(i).front()); 
+            jobs.at(i).pop_front();
+        }
     }
 
     while(not_finished){
@@ -68,7 +63,7 @@ Solution greedy_solution(instance jobs, int start_job, int total_machines){
         for (int i = 0; i < (int)ready_op.size(); i++) {
             auto op = ready_op.at(i);
 
-            if (op->processing_time < min) {
+            if ( op->processing_time < min) {
                 min = op->processing_time;
                 min_idx = i;
                 job_idx = op->job; 

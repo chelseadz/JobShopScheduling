@@ -40,7 +40,6 @@ void free_instance(instance& jobs) {
     jobs.clear();
 }
 
-
 int write_solution(const std::string& out_filename, const Solution& sol) {
     std::ofstream out(out_filename);
     if (!out) {
@@ -48,6 +47,7 @@ int write_solution(const std::string& out_filename, const Solution& sol) {
         return -1;
     }
 
+    out << calculate_max_time(sol) << "\n";
     for (const auto& machine : sol) {
         // out << "M" << i << ": ";
 
@@ -152,4 +152,18 @@ int read_instance(std::string filename, instance& jobs, int *total_jobs, int* to
 
     return 0;
 
+}
+
+int calculate_max_time(const Solution& sol) {
+    int max = 0;
+    OperationSol* lastOp = nullptr;
+
+    for (auto& machine : sol) {
+        lastOp = machine.back();
+        if(lastOp->end_time > max){
+            max = lastOp->end_time;
+        }
+    }
+
+    return max;
 }
