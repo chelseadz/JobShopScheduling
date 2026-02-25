@@ -61,39 +61,36 @@ int write_solution(const std::string& out_filename, const Solution& sol) {
     return 0;
 }
 
-int read_instance(std::string filename, instance& jobs, int *total_jobs, int* total_machines){
-
+int read_instance(const std::string& filename,
+                  instance& jobs, 
+                  JobsAllOps& jobs_all_ops,
+                  int* total_jobs,
+                  int* total_machines)
+{
     std::fstream input(filename);
-    
-
-    if(!input) {
-        printf("No se encontro el archivo \"%s\"", filename.c_str());
+    if (!input) {
+        std::cerr << "No se encontro el archivo \"" << filename << "\"\n";
         return -1;
     }
 
+    jobs.clear();
+
     std::string word;
+    input >> word; *total_jobs = std::stoi(word);
+    input >> word; *total_machines = std::stoi(word);
 
-    input >> word;
-    *total_jobs =  std::stoi(word);
-    input >> word;
-    *total_machines =  std::stoi(word);
+    std::cout << "total_jobs: " << *total_jobs
+              << ", total_machines: " << *total_machines << "\n";
 
-    printf("total_jobs: %d, total_machines: %d\n", *total_jobs, *total_machines);
+    jobs.reserve(*total_jobs);
+    jobs_all_ops.assign(*total_jobs, {}); 
 
     std::string line;
+    std::getline(input, line); // consumir fin de línea
 
-    std::getline(input, line);
+    for (int i = 0; i < *total_jobs; i++) {
+        OperationSol* req_op = nullptr;
 
-    int machine, processing_time;
-    Job aux;
-    // OperationSol* req_op = nullptr; 
-    OperationSol* op_sol = nullptr;
-
-    for (int i = 0; i < *total_jobs; i++){
-
-        OperationSol* req_op = nullptr;   // <-- reset for each job
-
-        // leer una linea que corresponde a un job
         if (!std::getline(input, line)) {
             std::cerr << "Falta la linea del job " << i << "\n";
             return 1;
@@ -101,16 +98,18 @@ int read_instance(std::string filename, instance& jobs, int *total_jobs, int* to
 
         std::stringstream ss(line);
 
-        // printf("line %d: %s\n",i, line.c_str());
+        Job aux;     
+        int j = 0;
 
-        int j = 0; // operacion 0 del job i
-        while(ss >> word){
-            machine = stoi(word); // guardar primera parte del par
-            ss >> word;
-            processing_time = stoi(word); // guardar la segunda parte del par
+        while (ss >> word) {
+            int machine = std::stoi(word);
+            if (!(ss >> word)) {
+                std::cerr << "Formato invalido en job " << i << " (par incompleto)\n";
+                return 2;
+            }
+            int processing_time = std::stoi(word);
 
-            // Operation op = std::make_pair(machine, processing_time);
-            op_sol = create_OperationSol(
+            OperationSol* op_sol = create_OperationSol(
                 machine,
                 processing_time,
                 i,
@@ -120,38 +119,22 @@ int read_instance(std::string filename, instance& jobs, int *total_jobs, int* to
                 req_op
             );
 
-            aux.push_back(op_sol); 
+            if (!op_sol) {
+                std::cerr << "create_OperationSol devolvio nullptr (job " << i << ", op " << j << ")\n";
+                return 3;
+            }
 
-            req_op = op_sol; // ahora la operacion actual es la requerida para la diguiente operacion
-            j++; // pasar a la siguiente operacion
+            aux.push_back(op_sol);
+            jobs_all_ops[i].push_back(op_sol); 
+
+            req_op = op_sol;
+            ++j;
         }
 
-        jobs.push_back(aux); // se guarda el job i
-
-        // printf("inserted job %d: \n", i);
-
-        // for(auto operation : jobs.at(i)){
-            
-        //     int req_idx = operation->requiredOp ? operation->requiredOp->op_idx : -1;
-
-        //     printf("(%d, %d, %d, %d) req(%d), ", 
-        //     operation->job,
-        //     operation->op_idx,
-        //     operation->machine, 
-        //     operation->processing_time,
-        //     req_idx
-        //     );
-        // } 
-        // printf("\n");
-
-        aux = Job();
-
+        jobs.push_back(std::move(aux));
     }
 
-    // printf("out loop\n");
-
     return 0;
-
 }
 
 int calculate_max_time(const Solution& sol) {
@@ -166,4 +149,17 @@ int calculate_max_time(const Solution& sol) {
     }
 
     return max;
+}
+
+
+int write_times(const std::string& out_filename, const Solution& sol) {
+    std::ofstream out(out_filename, std::ios::app);
+    if (!out) {
+        std::cerr << "Could not open output file: " << out_filename << "\n";
+        return -1;
+    }
+
+    out << calculate_max_time(sol) << "\n";
+
+    return 0;
 }

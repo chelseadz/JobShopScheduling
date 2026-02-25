@@ -1,11 +1,12 @@
 #include <stdio.h>
 #include <iostream>
 #include <filesystem>
+#include <unordered_set>
 
 #include "Validation.h"
 #include "Random.h"
 #include "Greedy.h"
-
+#include "Gurobi.h"
 
 int main(int argc, char* argv[]){
 
@@ -17,11 +18,11 @@ int main(int argc, char* argv[]){
     std::string filename = std::string(argv[1]);
     instance jobs;
 
-    int total_jobs, total_machines;
+    int total_jobs, total_machines, best_time;
 
-    int err = read_instance(filename, jobs, &total_jobs, &total_machines);
+    std::vector<std::vector<OperationSol* > > jobs_all_ops; 
+    int err = read_instance(filename, jobs, jobs_all_ops, &total_jobs, &total_machines);
     printf("read_instance out \n");
-
 
 
     if (err) {
@@ -29,44 +30,67 @@ int main(int argc, char* argv[]){
         return err;
     }
 
-    // Solution sol = random_solution(jobs, total_machines);
-    // printf("random_solution out \n");
-
-    // err = evaluate_solution(sol);
-    // if (err != 0) {
-    //     printf("evaluate_solution: infeasible\n");
-    // }
-
-    // err = validate_solution(sol);
-    // if (err != 0) {
-    //     printf("validate_solution: %d errors\n", err);
-    // } else {
-    //     printf("solution OK\n");
-    // }
-
-    // write_solution("random_solution.txt", sol);
+    // SPT
+    best_time = std::numeric_limits<int>::max();
     for(int i = 0; i < (int) jobs.size(); i++){
-        Solution sol = greedy_solution(jobs, i, total_machines);
-        printf("greedy_solution out \n");
+        Solution sol = greedy_SPT(jobs, i, total_machines);
+        // printf("greedy_solution out \n");
 
         err = validate_solution(sol);
         if (err != 0) {
             printf("validate_solution: %d errors\n", err);
         } else {
-            printf("solution OK\n");
+            printf("Inicio con %d: %d\n", i, calculate_max_time(sol));
         }
         std::filesystem::path outDir = "solutions";  
         std::filesystem::create_directories(outDir); 
 
-        std::filesystem::path outFile = outDir / ("greedy_" + std::to_string(i) + ".sol");
+        std::filesystem::path outFile = outDir / ("best_SPT.sol");
+        std::filesystem::path outTimes = ("times_SPT.txt");
+        
+        int time = calculate_max_time(sol);
+        if(time < best_time)
+        if(time < best_time){
+            write_solution(outFile.string(), sol);
+            best_time = time;
+        }
 
-        write_solution(outFile.string(), sol);
+        write_times(outTimes.string(), sol);
+        
     }
 
+    // LPT
+    best_time = std::numeric_limits<int>::max();
+    for(int i = 0; i < (int) jobs.size(); i++){
+        Solution sol = greedy_LPT(jobs, i, total_machines);
+        // printf("greedy_solution out \n");
 
-    for(int i = 0; i < 100; i++){
+        err = validate_solution(sol);
+        if (err != 0) {
+            printf("validate_solution: %d errors\n", err);
+        } else {
+            printf("Inicio con %d: %d\n", i, calculate_max_time(sol));
+        }
+        std::filesystem::path outDir = "solutions";  
+        std::filesystem::create_directories(outDir); 
+
+        std::filesystem::path outFile = outDir / ("best_LPT.sol");
+        std::filesystem::path outTimes = ("times_LPT.txt");
+
+        int time = calculate_max_time(sol);
+        if(time < best_time){
+            write_solution(outFile.string(), sol);
+            best_time = time;
+        }
+
+        write_times(outTimes.string(), sol);
+        
+    }
+
+    best_time = std::numeric_limits<int>::max();
+    for(int i = 0; i < total_jobs; i++){
         Solution sol = random_solution(jobs, total_machines);
-        printf("random_solution out \n");
+        // printf("random_solution out \n");
 
         err = evaluate_solution(sol);
         if (err != 0) {
@@ -77,18 +101,31 @@ int main(int argc, char* argv[]){
         if (err != 0) {
             printf("validate_solution: %d errors\n", err);
         } else {
-            printf("solution OK\n");
+            // printf("solution OK\n");
+            printf("Random %d: %d\n", i, calculate_max_time(sol));
         }
 
         std::filesystem::path outDir = "solutions";  
         std::filesystem::create_directories(outDir); 
 
-        std::filesystem::path outFile = outDir / ("random_" + std::to_string(i) + ".sol");
+        std::filesystem::path outFile = outDir / ("best_random.sol");
+        std::filesystem::path outTimes = ("times_random.txt");
 
-        write_solution(outFile.string(), sol);
+        int time = calculate_max_time(sol);
+        if(time < best_time){
+            write_solution(outFile.string(), sol);
+            best_time = time;
+        }
+
+        write_times(outTimes.string(), sol);
     }
 
-    // delete jobs;
+
+    // int rc = write_jssp_lp_bigM("jssp.lp", jobs_all_ops, total_machines, 0);
+    // if (rc != 0) {
+    //     std::cerr << "Error escribiendo LP: " << rc << "\n";
+    // }
+
     free_instance(jobs);
 
     return 0;

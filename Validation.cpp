@@ -5,59 +5,6 @@
 #include <cstdio>
 #include <algorithm>
 
-// int evaluate_solution(Solution& sol){
-//     OperationSol* actual_op, *before_op;
-
-    
-//     bool not_finished= true;
-//     int j = 0;
-
-//     while(not_finished){
-
-//         // iteramos sobre las maquinas de la solucion
-//         for(int i=0; i<sol.size(); i++){
-//             auto machine = sol.at(i);
-
-//             if(machine.size() <= j) {
-//                 continue;
-//             }
-
-//             actual_op = machine.at(j);
-//             if(j!= 0) before_op = machine.at(j-1);
-
-//             // set start_time
-//             if(actual_op->requiredOp != nullptr){
-//                 int required_end_time = actual_op->requiredOp->end_time;
-//                 int machine_end_time = before_op->end_time;
-
-//                 if(j != 0) actual_op->start_time = machine_end_time;
-
-//                 if(machine_end_time < required_end_time)
-//                     actual_op->start_time = required_end_time;
-//             }else{
-//                 actual_op->start_time = 0;
-//             }
-
-//             // set end_time
-//             actual_op->end_time = actual_op->start_time + actual_op->processing_time;
-
-//         } // end for
-
-//         j++; // pasamos a la siguiente columna de operaciones
-
-//         // terminar si ya no quedan columnasa para ninguna maquina
-//         for(auto machine : sol){
-//             if(machine.size() <= j) {
-//                 not_finished =false;
-//                 continue;
-//             }
-//             not_finished = true;
-//         }
-//     }
-
-//     return 0;
-// }
-
 
 int validate_solution(const Solution& sol) {
     int errors = 0;
@@ -71,7 +18,7 @@ int validate_solution(const Solution& sol) {
 
             // duration consistency
             if (op->end_time != op->start_time + op->processing_time) {
-                std::printf("[ERR] M%d pos %d (J%d,O%d): end(%d) != start(%d)+p(%d)\n",
+                printf("[ERR] M%d pos %d (J%d,O%d): end(%d) != start(%d)+p(%d)\n",
                             m, k, op->job, op->op_idx, op->end_time, op->start_time, op->processing_time);
                 errors++;
             }
@@ -80,7 +27,7 @@ int validate_solution(const Solution& sol) {
             if (k > 0) {
                 const OperationSol* prev = machine[k - 1];
                 if (op->start_time < prev->end_time) {
-                    std::printf("[ERR] Machine overlap M%d: (J%d,O%d) start=%d < prev end=%d\n",
+                    printf("[ERR] Machine overlap M%d: (J%d,O%d) start=%d < prev end=%d\n",
                                 m, op->job, op->op_idx, op->start_time, prev->end_time);
                     errors++;
                 }
@@ -90,7 +37,7 @@ int validate_solution(const Solution& sol) {
             if (op->requiredOp != nullptr) {
                 const OperationSol* req = op->requiredOp;
                 if (op->start_time < req->end_time) {
-                    std::printf("[ERR] Job precedence: (J%d,O%d) start=%d < required (J%d,O%d) end=%d\n",
+                    printf("[ERR] Job precedence: (J%d,O%d) start=%d < required (J%d,O%d) end=%d\n",
                                 op->job, op->op_idx, op->start_time,
                                 req->job, req->op_idx, req->end_time);
                     errors++;
@@ -102,7 +49,7 @@ int validate_solution(const Solution& sol) {
     return errors; // 0 = OK
 }
 
-
+// Asigna tiempos a una operacion random
 int evaluate_solution(Solution& sol) {
     
     int N = 0;

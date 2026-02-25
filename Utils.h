@@ -21,6 +21,8 @@ typedef std::vector< Job >  instance;
 
 typedef std::vector<std::vector<OperationSol* > >  Solution;
 
+typedef std::vector<std::vector<OperationSol* > > JobsAllOps;
+
 OperationSol* create_OperationSol(
     int machine,
     int processing_time,
@@ -35,8 +37,14 @@ void free_instance(instance& jobs);
 
 int write_solution(const std::string& out_filename, const Solution& sol);
 
-int read_instance(std::string filename, instance& jobs, int *total_jobs, int* total_machines);
+int read_instance(const std::string& filename,
+                  instance& jobs,
+                  std::vector<std::vector<OperationSol*>>& jobs_all_ops,
+                  int* total_jobs,
+                  int* total_machines);
 
 int calculate_max_time(const Solution& sol);
+
+int write_times(const std::string& out_filename, const Solution& sol);
 
 #endif 

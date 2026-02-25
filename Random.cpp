@@ -5,7 +5,7 @@
 #include "Random.h"
 
 Solution random_solution(instance jobs, int total_machines){
-    printf("Generating random_solution...  \n");
+    // printf("Generating random_solution...  \n");
     Solution sol(total_machines);
 
     auto seed = static_cast<unsigned long long>(
@@ -18,6 +18,12 @@ Solution random_solution(instance jobs, int total_machines){
     bool not_finished = true;
     int actual_job, current_machine;
     OperationSol* actual_op;
+
+    for(Job job : jobs){
+        for(OperationSol* op : job){
+            op->end_time = op->start_time = 0;
+        }
+    }
 
     while(not_finished){
 
