@@ -2,54 +2,6 @@
 #include <cstdio>
 #include <limits>
 
-void printOp(OperationSol* op){
-
-    if(op != nullptr)
-        printf("(J: %d, op: %d, M: %d, s: %d, e: %d)\n", op->job, op->op_idx, op->machine, op->start_time, op->end_time);
-    else
-        printf("null \n");
-    return;
-}
-
-int add_operation(Solution& sol, OperationSol* actual_op){
-
-    // OperationSol* actual_op = jobs.at(job_ix).front();
-
-    // jobs.at(job_ix).pop_front();
-    printf("actual: ");
-    printOp(actual_op);
-    printf("requiredOp: ");
-    printOp(actual_op->requiredOp);
-
-    // machine index sanity
-    if (actual_op == nullptr) return -3;
-    if (actual_op->machine < 0 || actual_op->machine >= (int)sol.size()) return -4;
-
-    OperationSol* previous_op = nullptr;
-    if (!sol.at(actual_op->machine).empty()) {
-        previous_op = sol.at(actual_op->machine).back();
-    }
-
-    OperationSol* required_op = actual_op->requiredOp; 
-
-    if(required_op && required_op->end_time == 0 && actual_op->op_idx != 0) 
-        return -1;  // no se ha procesado required_op y la operacion no es la inicial 
-
-    int machine_ready = previous_op ? previous_op->end_time : 0;
-    int job_ready     = required_op ? required_op->end_time : 0;
-
-    actual_op->start_time = (machine_ready > job_ready) ? machine_ready : job_ready;
-    actual_op->end_time = actual_op->start_time + actual_op->processing_time;
-
-    printOp(actual_op);
-    // agregamos la operacion actual en la maquina que corresponda
-    sol.at(actual_op->machine).push_back(actual_op);
-
-    // printf("6\n");
-    return 0;
-}
-
-
 Solution greedy_SPT(instance jobs, int start_job, int total_machines){
     // printf("Generating greedy_solution...  \n");
     Solution sol(total_machines);

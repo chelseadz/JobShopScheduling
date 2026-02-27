@@ -92,17 +92,12 @@ int main(int argc, char* argv[]){
         Solution sol = random_solution(jobs, total_machines);
         // printf("random_solution out \n");
 
-        err = evaluate_solution(sol);
-        if (err != 0) {
-            printf("evaluate_solution: infeasible\n");
-        }
-
         err = validate_solution(sol);
         if (err != 0) {
             printf("validate_solution: %d errors\n", err);
         } else {
             // printf("solution OK\n");
-            printf("Random %d: %d\n", i, calculate_max_time(sol));
+            // printf("Random %d: %d\n", i, calculate_max_time(sol));
         }
 
         std::filesystem::path outDir = "solutions";  

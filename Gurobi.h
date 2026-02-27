@@ -32,6 +32,28 @@ static long long sum_processing_times(const JobsAllOps& jobs_all_ops) {
     return s;
 }
 
+static int generateMinTime(const JobsAllOps& jobs, JobsMinTimes& matrix_min_time){
+    int err = 0;
+    int i = 0, j = 0;
+
+    for(auto job : jobs){
+        // printf("job: %d\n", job.at(0)->job);
+        matrix_min_time[i].reserve(job.size());
+        j = 0;
+        for(auto op : job){
+            if(j != 0)
+                matrix_min_time[i].push_back(op->processing_time + matrix_min_time[i][j-1]);
+            else
+                matrix_min_time[i].push_back(op->processing_time);
+            printf("S_%d_%d =  %d. processing_time: %d \n", i, j, matrix_min_time[i].back(), op->processing_time);
+            j++;
+        }
+        i++;
+    }
+
+    return err;
+}
+
 // Optional validation for Taillard classic: each job has M ops and uses each machine once.
 static void validate_taillard_classic(const JobsAllOps& jobs_all_ops, int total_machines) {
     const int J = (int)jobs_all_ops.size();
@@ -76,6 +98,11 @@ int write_jssp_lp_bigM(const std::string& lp_filename,
     long long Mbig = M_value;
     if (Mbig <= 0) Mbig = sum_processing_times(jobs_all_ops);
     if (Mbig <= 0) return -3;
+
+    // Calculate min start times for each op
+    JobsMinTimes matrix_min_time;
+    matrix_min_time.assign(J,{});
+    generateMinTime(jobs_all_ops, matrix_min_time);
 
     // Build ops per machine: list of (j,k,p)
     struct JK { int j; int k; int p; };
@@ -166,7 +193,8 @@ int write_jssp_lp_bigM(const std::string& lp_filename,
     out << "\nBounds\n";
     for (int j = 0; j < J; ++j)
         for (int k = 0; k < M; ++k)
-            out << "  " << Svar(j,k) << " >= 0\n";
+            out << "  " << Svar(j,k) << " >= " << matrix_min_time[j][k] << "\n";
+            // out << "  " << Svar(j,k) << " >= " << 0 << "\n";
     out << "  Cmax >= 0\n";
 
     // ===== Binary vars =====
@@ -183,3 +211,4 @@ int write_jssp_lp_bigM(const std::string& lp_filename,
     out << "\nEnd\n";
     return 0;
 }
+

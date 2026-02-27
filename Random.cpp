@@ -39,12 +39,10 @@ Solution random_solution(instance jobs, int total_machines){
         actual_op = jobs.at(actual_job).front();
         jobs.at(actual_job).pop_front();
 
-        // printf("pop front: (%d, %d)\n", actual_op->job, actual_op->op_idx);
-        
         current_machine = actual_op->machine;
 
         // agregamos la operacion actual en la maquina que corresponda
-        sol.at(current_machine).push_back(actual_op);
+        add_operation(sol, actual_op);
 
         for(Job job : jobs){
             if(!job.empty()) {
@@ -54,18 +52,6 @@ Solution random_solution(instance jobs, int total_machines){
             not_finished = false;
         }
     }
-
-    // int i = 0;
-    // for(auto machine : sol){
-    //     printf("M%d: ", i);
-
-    //     for(auto op : machine){
-    //         printf("(%d, %d, %d), ", op->job, op->op_idx, op->processing_time); // job
-    //     }
-
-    //     printf("\n");
-    //     i++;
-    // }
 
     return sol;
 }
